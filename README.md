@@ -5,7 +5,8 @@ Configuration can be defined in ansible template format and will support jinja2 
 
 Configuration will be communicated to target networking device with netconf protocol.
 
-#new module
+# new module
+
 json_parser - parses json configs to native device config in xml based on ansible_network_os
 ex:
 - hosts: rtr1
