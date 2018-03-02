@@ -1,0 +1,6 @@
+ansible_connection: netconf
+ansible_network_os: iosxr
+ansible_user: vagrant
+ansible_ssh_pass: vagrant
+ansible_become: yes
+ansible_become_method: enable

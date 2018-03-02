@@ -1,0 +1,17 @@
+---
+- hosts: rtr1
+  tasks:
+    - name:  Parse Bgp Config                                                    
+      json_parser:                                                                                                         
+          src: 'templates/bgp_edit_config.json'
+          output: 'templates/bgp_edit_config_exp.xml'
+      register: result     
+
+    - name: Play bgp config via netconf
+      netconf_config:
+          src: 'bgp_edit_config_exp.xml'
+      register: result
+                                                                                                                             
+    - assert: &true                                                                                                                
+        that:                                                                                                                
+          - 'result.changed == true'                                                                                         
