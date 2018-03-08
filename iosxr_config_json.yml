@@ -3,7 +3,7 @@
   tasks:
     - name:  Parse Bgp Config                                                    
       json_parser:                                                                                                         
-          src: 'templates/bgp_edit_config.json'
+          src: 'bgp_edit_config.json'
           output: 'templates/bgp_edit_config_exp.xml'
       register: result     
 
