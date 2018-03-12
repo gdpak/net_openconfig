@@ -46,9 +46,9 @@
   "neighbors": {
    "neighbor": [
     {
-     "neighbor-address": "11.7.1.2",
+     "neighbor-address": "{{ rtr1_neighbor }}",
      "config": {
-      "neighbor-address": "11.7.1.2",
+      "neighbor-address": "{{ rtr1_neighbor }}",
       "peer-group": "IBGP"
      }
     }

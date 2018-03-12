@@ -17,6 +17,7 @@ from ansible.module_utils.network.common.utils import to_list
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_bytes, to_text
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable, AnsibleFileNotFound
+from ansible.module_utils.six.moves.urllib.parse import urlsplit
 from collections import OrderedDict
 
 try:
@@ -45,6 +46,11 @@ class ActionModule(ActionBase):
         result = super(ActionModule, self).run(tmp, task_vars)
 
         try:
+           self._handle_template()
+        except ValueError as exc:
+           return dict(failed=True, msg=to_text(exc))
+
+        try:
             src = self._task.args.get('src')
             output_file = self._task.args.get('output')
         except KeyError as exc:
@@ -52,17 +58,18 @@ class ActionModule(ActionBase):
 
         self.facts = {}
 
+        q(src)
+        '''
         if not os.path.exists(src) and not os.path.isfile(src):
             raise AnsibleError("src is either missing or invalid")
-        
+        '''
         #json_config = self._loader.load_from_file(src)
-        with open(src, 'r') as f:
-           json_config = f.read()
-           j_obj = json.loads(json_config, object_pairs_hook=OrderedDict)
-           config_xml = self._json_to_xml(j_obj)
-           config_xml_w_xmlns = self._add_openconfig_xmlns_to_config(config_xml,
-                   openconfig_xmlns)
-           config_xml_final = self._post_openconfig_parsing(config_xml_w_xmlns)
+        #with open(src, 'r') as f:
+        #   json_config = f.read()
+        j_obj = json.loads(src, object_pairs_hook=OrderedDict)
+        config_xml = self._json_to_xml(j_obj)
+        config_xml_w_xmlns = self._add_openconfig_xmlns_to_config(config_xml, openconfig_xmlns)
+        config_xml_final = self._post_openconfig_parsing(config_xml_w_xmlns)
 
         with open(output_file, 'w') as f:
             f.write(config_xml_final)
@@ -95,7 +102,7 @@ class ActionModule(ActionBase):
            return "\n".join(result_list)
 
         #if json_obj_type is dict:
-        if json_obj_type is collections.OrderedDict:
+        if (json_obj_type is collections.OrderedDict) or (json_obj_type is dict):
            for tag_name in json_obj:
                sub_obj = json_obj[tag_name]
                result_list.append("%s<%s>" % (line_padding, tag_name))
@@ -105,4 +112,43 @@ class ActionModule(ActionBase):
            
         return "%s%s" % (line_padding, json_obj)
 
+    def _get_working_path(self):
+        cwd = self._loader.get_basedir()
+        if self._task._role is not None:
+            cwd = self._task._role._role_path
+        return cwd
 
+    def _handle_template(self):
+        src = self._task.args.get('src')
+        working_path = self._get_working_path()
+
+        if os.path.isabs(src) or urlsplit('src').scheme:
+            source = src
+        else:
+            source = self._loader.path_dwim_relative(working_path, 'templates', src)
+            if not source:
+                source = self._loader.path_dwim_relative(working_path, src)
+
+        if not os.path.exists(source):
+            raise ValueError('path specified in src not found')
+
+        try:
+            with open(source, 'r') as f:
+                template_data = to_text(f.read())
+        except IOError:
+            return dict(failed=True, msg='unable to load src file')
+
+        # Create a template search path in the following order:
+        # [working_path, self_role_path, dependent_role_paths, dirname(source)]
+        searchpath = [working_path]
+        if self._task._role is not None:
+            searchpath.append(self._task._role._role_path)
+            if hasattr(self._task, "_block:"):
+                dep_chain = self._task._block.get_dep_chain()
+                if dep_chain is not None:
+                    for role in dep_chain:
+                        searchpath.append(role._role_path)
+        searchpath.append(os.path.dirname(source))
+        self._templar.environment.loader.searchpath = searchpath
+        self._task.args['src'] = self._templar.template(template_data,
+                convert_data=False) 

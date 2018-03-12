@@ -7,11 +7,22 @@
           output: 'templates/bgp_edit_config_exp.xml'
       register: result     
 
-    - name: Play bgp config via netconf
+    - name: Play bgp config via netconf to IosXr
       netconf_config:
           src: 'bgp_edit_config_exp.xml'
       register: result
                                                                                                                              
     - assert: &true                                                                                                                
         that:                                                                                                                
-          - 'result.changed == true'                                                                                         
+          - 'result.changed == true'
+
+- hosts: vsrx02
+  tasks:
+    - name: Play bgp config via netconf to Junos
+      netconf_config:
+          src: 'bgp_edit_config_exp.xml'
+      register: result
+                                                                                                                             
+    - assert:                                                                                                             
+        that:                                                                                                                
+          - 'result.changed == true'
