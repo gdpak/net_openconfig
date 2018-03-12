@@ -4,6 +4,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import absolute_import
 import os
 import re
 import copy
@@ -19,6 +20,7 @@ from ansible.module_utils._text import to_bytes, to_text
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable, AnsibleFileNotFound
 from ansible.module_utils.six.moves.urllib.parse import urlsplit
 from collections import OrderedDict
+from schema_transform.iosxr_netconf import IosxrSchemaTransform
 
 try:
     from __main__ import display
@@ -29,13 +31,6 @@ except ImportError:
 def warning(msg):
     if C.ACTION_WARNINGS:
         display.warning(msg)
-
-openconfig_xmlns = {
-    "<bgp>" : "<bgp xmlns=\"http://openconfig.net/yang/bgp\">",
-    "<afi-safi-name>" : "<afi-safi-name xmlns:idx=\"http://openconfig.net/yang/bgp-types\">",
-    "ipv4-unicast" : "idx:ipv4-unicast",
-    "True"         : "true"
-}
 
 class ActionModule(ActionBase):
 
@@ -57,19 +52,16 @@ class ActionModule(ActionBase):
             return {'failed': True, 'msg': 'missing required argument: %s' % exc}
 
         self.facts = {}
+        play_context = copy.deepcopy(self._play_context)
+        play_context.network_os = self._get_network_os(task_vars)
+        q("network_os=%s connection=%s \n" % (play_context.network_os, play_context.connection))
 
-        q(src)
-        '''
-        if not os.path.exists(src) and not os.path.isfile(src):
-            raise AnsibleError("src is either missing or invalid")
-        '''
-        #json_config = self._loader.load_from_file(src)
-        #with open(src, 'r') as f:
-        #   json_config = f.read()
-        j_obj = json.loads(src, object_pairs_hook=OrderedDict)
-        config_xml = self._json_to_xml(j_obj)
-        config_xml_w_xmlns = self._add_openconfig_xmlns_to_config(config_xml, openconfig_xmlns)
-        config_xml_final = self._post_openconfig_parsing(config_xml_w_xmlns)
+        # Load appropriate low level config generator bases on network_os
+        # and connection type
+
+        if play_context.network_os == 'iosxr' and play_context.connection == 'netconf':
+           schematrans = IosxrSchemaTransform()
+           config_xml_final = schematrans.openconfig_to_netconf(src)
 
         with open(output_file, 'w') as f:
             f.write(config_xml_final)
@@ -77,40 +69,6 @@ class ActionModule(ActionBase):
         #self.ds.update(task_vars)
         result['ansible_facts'] = self.facts
         return result
-
-    def _add_openconfig_xmlns_to_config(self, result_list, xmlns_dict):
-        for key in xmlns_dict:
-           result_list = result_list.replace(key, xmlns_dict[key])
-        
-        return (result_list)
-
-    def _post_openconfig_parsing(self, result_list, line_padding=""):
-        start_tag = "<config>\n"
-        end_tag   = "\n%s</%s>" % (line_padding, "config")
-        result_list = start_tag + result_list + end_tag
-        return (result_list)
-        
-
-    def _json_to_xml(self, json_obj, line_padding=""):
-        result_list = []
-        
-        json_obj_type = type(json_obj)
-        
-        if json_obj_type is list:
-           for sub_elem in json_obj:
-               result_list.append(self._json_to_xml(sub_elem, line_padding))
-           return "\n".join(result_list)
-
-        #if json_obj_type is dict:
-        if (json_obj_type is collections.OrderedDict) or (json_obj_type is dict):
-           for tag_name in json_obj:
-               sub_obj = json_obj[tag_name]
-               result_list.append("%s<%s>" % (line_padding, tag_name))
-               result_list.append(self._json_to_xml(sub_obj, "\t"+line_padding))
-               result_list.append("%s</%s>" % (line_padding, tag_name))
-           return "\n".join(result_list)
-           
-        return "%s%s" % (line_padding, json_obj)
 
     def _get_working_path(self):
         cwd = self._loader.get_basedir()
@@ -151,4 +109,19 @@ class ActionModule(ActionBase):
         searchpath.append(os.path.dirname(source))
         self._templar.environment.loader.searchpath = searchpath
         self._task.args['src'] = self._templar.template(template_data,
-                convert_data=False) 
+                convert_data=False)
+
+    def _get_network_os(self, task_vars):
+        if 'network_os' in self._task.args and self._task.args['network_os']:
+            display.vvvv('Getting network OS from task argument')
+            network_os = self._task.args['network_os']
+        elif self._play_context.network_os:
+            display.vvvv('Getting network OS from inventory')
+            network_os = self._play_context.network_os
+        elif 'network_os' in task_vars.get('ansible_facts', {}) and task_vars['ansible_facts']['network_os']:
+            display.vvvv('Getting network OS from fact')
+            network_os = task_vars['ansible_facts']['network_os']
+        else:
+            raise AnsibleError('ansible_network_os must be specified on this host to use platform agnostic modules')
+
+        return network_os
