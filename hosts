@@ -9,3 +9,6 @@ rtr3 ansible_host=11.2.1.3 ansible_network_os=vyos
 
 [ios]
 rtr4 ansible_host=ios01.example.net ansible_network_os=ios
+
+[vsrx]
+vsrx02 ansible_host=vsrx02.example.net
