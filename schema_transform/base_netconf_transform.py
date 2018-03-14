@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 from collections import OrderedDict
 
-class SchemaTransformBase(object):
+class SchemaTransformNetconfBase(object):
 
     '''
     Base Class for all common conversion for supported connection type
