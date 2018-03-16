@@ -1,0 +1,19 @@
+<config>
+  <configuration>
+      <interfaces>
+        <interface xc:operation="create">
+            <name>lo0</name>
+            <unit>
+                <name>911</name>
+                <family>
+                    <inet>
+                        <address>
+                            <name>111.1.1.1/32</name>
+                        </address>
+                    </inet>
+                </family>
+            </unit>
+        </interface>
+     </interfaces>
+   </configuration>
+</config>
