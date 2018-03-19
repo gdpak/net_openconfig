@@ -20,7 +20,7 @@
   tasks:
     - name: Play bgp config via netconf to Junos
       netconf_config:
-          src: 'junos_config.xml'
+          src: 'bgp_edit_config_junos.xml'
       register: result
       tags: junos
                                                                                                                              
