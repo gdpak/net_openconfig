@@ -2,6 +2,19 @@ from __future__ import (absolute_import, division, print_function)
 
 import json
 from collections import OrderedDict
+import q
+
+try:
+    from lxml import etree
+    HAS_XML = True
+except ImportError:
+    HAS_XML = False
+
+OPENCONFIG_NS_MAP = {
+    'interfaces' : {None : 'http://openconfig.net/yang/interfaces'},
+    'ipv4'      : {None : 'http://openconfig.net/yang/interfaces/ip'},
+    'type'      : {'idx': 'urn:ietf:params:xml:ns:yang:iana-if-type'}
+}
 
 class SchemaTransformNetconfBase(object):
 
@@ -16,35 +29,43 @@ class SchemaTransformNetconfBase(object):
     '''
     def openconfig_to_netconf(self, config):
         json_py_obj = json.loads(config, object_pairs_hook=OrderedDict)
-        config_xml = self._json_to_xml(json_py_obj)
-        config_xml_final = self._post_openconfig_parsing(config_xml)
+        root = etree.Element("config")
+        config_xml = self._json_to_xml(json_py_obj, root)
+        return (etree.tostring(root, pretty_print=True))
 
-        return (config_xml_final)
-
-    def _json_to_xml(self, json_obj, line_padding=""):
-        result_list = []
-
+    def _json_to_xml(self, json_obj, root):
         json_obj_type = type(json_obj)
 
         if json_obj_type is list:
             for sub_elem in json_obj:
-                result_list.append(self._json_to_xml(sub_elem, line_padding))
-            return "\n".join(result_list)
+                self._json_to_xml(sub_elem, root)
 
         # if json_obj_type is dict:
         if (json_obj_type is OrderedDict) or (json_obj_type is dict):
             for tag_name in json_obj:
                 sub_obj = json_obj[tag_name]
-                result_list.append("%s<%s>" % (line_padding, tag_name))
-                result_list.append(self._json_to_xml(sub_obj, "\t" + line_padding))
-                result_list.append("%s</%s>" % (line_padding, tag_name))
-            return "\n".join(result_list)
 
-        return "%s%s" % (line_padding, json_obj)
+                if OPENCONFIG_NS_MAP.has_key(tag_name):
+                    container_ele = etree.SubElement(root, tag_name,
+                        nsmap=OPENCONFIG_NS_MAP[tag_name])
+                else:
+                    container_ele = etree.SubElement(root, tag_name)
 
-    def _post_openconfig_parsing(self, result_list, line_padding=""):
-        start_tag = "<config>\n"
-        end_tag   = "\n%s</%s>" % (line_padding, "config")
-        result_list = start_tag + result_list + end_tag
-        return (result_list)
+                if (type(sub_obj) is int) or (type(sub_obj) is str) or \
+                   (type(sub_obj) is unicode):
+                    ns_tag = container_ele.nsmap
+                    for keys in ns_tag:
+                        if keys is not None:
+                            prefix = keys
+                            q(ns_tag)
+                        else:
+                            prefix = None
+                    if prefix is not None:
+                       container_ele.text = prefix+":"+str(sub_obj)
+                    else:
+                       container_ele.text = str(sub_obj)
+
+                else:
+                    self._json_to_xml(sub_obj, container_ele)
+
 

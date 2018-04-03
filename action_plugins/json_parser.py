@@ -20,7 +20,7 @@ from ansible.module_utils._text import to_bytes, to_text
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable, AnsibleFileNotFound
 from ansible.module_utils.six.moves.urllib.parse import urlsplit
 from collections import OrderedDict
-from schema_transform.iosxr_netconf import IosxrSchemaTransform
+from schema_transform.iosxr_netconf import IosxrSchemaTransformNetconf
 
 try:
     from __main__ import display
@@ -60,7 +60,7 @@ class ActionModule(ActionBase):
         # and connection type
 
         if play_context.network_os == 'iosxr' and play_context.connection == 'netconf':
-           schematrans = IosxrSchemaTransform()
+           schematrans = IosxrSchemaTransformNetconf()
            config_xml_final = schematrans.openconfig_to_netconf(src)
 
         with open(output_file, 'w') as f:
