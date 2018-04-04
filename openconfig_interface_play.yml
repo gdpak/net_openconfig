@@ -17,3 +17,15 @@
         that:                                                                                                                
           - 'result.changed == true'
 
+- hosts: vsrx01
+  tasks:
+    - name: Play bgp config via netconf to Junos
+      netconf_config:
+          src: 'interface_openconfig.xml'
+      register: result
+      tags: junos
+                                                                                                                             
+    - assert:                                                                                                             
+        that:                                                                                                                
+          - 'result.changed == true'
+

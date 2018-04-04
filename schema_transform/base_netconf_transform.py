@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import json
+from schema_transform.openconfig_nsmap_def import OPENCONFIG_NS_MAP 
 from collections import OrderedDict
 import q
 
@@ -9,12 +10,6 @@ try:
     HAS_XML = True
 except ImportError:
     HAS_XML = False
-
-OPENCONFIG_NS_MAP = {
-    'interfaces' : {None : 'http://openconfig.net/yang/interfaces'},
-    'ipv4'      : {None : 'http://openconfig.net/yang/interfaces/ip'},
-    'type'      : {'idx': 'urn:ietf:params:xml:ns:yang:iana-if-type'}
-}
 
 class SchemaTransformNetconfBase(object):
 

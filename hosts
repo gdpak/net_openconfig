@@ -14,3 +14,4 @@ rtr4 ansible_host=ios01.example.net ansible_network_os=ios
 
 [vsrx]
 vsrx02 ansible_host=vsrx02.example.net
+vsrx01 ansible_host=vsrx01.example.net

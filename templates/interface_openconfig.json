@@ -2,23 +2,23 @@
     "interfaces": [
      {
         "interface": {
-            "name" : "GigabitEthernet0/0/0/2",
+            "name" : "{{ interface1_name }}",
             "config" : {
-                "name" : "GigabitEthernet0/0/0/2",
+                "name" : "{{ interface1_name }}",
                 "enabled": "true",
                 "type": "ethernetCsmacd"
             },
             "subinterfaces": {
                 "subinterface" : [
                 {
-                    "index" : 0,
+                    "index" : {{ interface1_subinterface1_index }},
                     "ipv4" : {
                         "address" : [
                         {
-                            "ip": "11.19.1.1",
+                            "ip": "{{ interface1_sub1_ip }}",
                             "config": {
-                                "ip" : "11.9.1.1",
-                                "prefix-length" : 24
+                                "ip" : "{{ interface1_sub1_ip }}",
+                                "prefix-length" : {{ interface1_sub1_mask }}
                             }
                         }
                         ]

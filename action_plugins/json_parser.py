@@ -20,6 +20,7 @@ from ansible.module_utils._text import to_bytes, to_text
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable, AnsibleFileNotFound
 from ansible.module_utils.six.moves.urllib.parse import urlsplit
 from collections import OrderedDict
+from schema_transform.base_netconf_transform import SchemaTransformNetconfBase
 from schema_transform.iosxr_netconf import IosxrSchemaTransformNetconf
 
 try:
@@ -59,9 +60,13 @@ class ActionModule(ActionBase):
         # Load appropriate low level config generator bases on network_os
         # and connection type
 
-        if play_context.network_os == 'iosxr' and play_context.connection == 'netconf':
-           schematrans = IosxrSchemaTransformNetconf()
-           config_xml_final = schematrans.openconfig_to_netconf(src)
+        if play_context.connection == 'netconf':
+           base_schematrans = SchemaTransformNetconfBase()
+           config_xml_base = base_schematrans.openconfig_to_netconf(src)
+
+        if play_context.network_os == 'iosxr':
+           iosxr_schematrans = IosxrSchemaTransformNetconf()
+           config_xml_final = iosxr_schematrans.openconfig_to_netconf(config_xml_base)
 
         with open(output_file, 'w') as f:
             f.write(config_xml_final)
