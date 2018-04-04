@@ -1,0 +1,9 @@
+
+OPENCONFIG_NS_MAP = {
+    'interfaces' :{None : 'http://openconfig.net/yang/interfaces'},
+    'ipv4'      : {None : 'http://openconfig.net/yang/interfaces/ip'},
+    'type'      : {'idx': 'urn:ietf:params:xml:ns:yang:iana-if-type'},
+    'bgp'       : {None : 'http://openconfig.net/yang/bgp'},
+    'afi-safi-name' : {'idx' : 'http://openconfig.net/yang/bgp-types'}
+}
+
