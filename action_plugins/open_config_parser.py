@@ -10,6 +10,7 @@ import re
 import copy
 import json
 import collections
+import yaml
 import q
 
 from ansible import constants as C
@@ -52,6 +53,12 @@ class ActionModule(ActionBase):
         except KeyError as exc:
             return {'failed': True, 'msg': 'missing required argument: %s' % exc}
 
+        #Optional Arguments Handling
+        try:
+            xpath_map_data = self._handle_xpath_map()
+        except ValueError as exc:
+            return dict(failed=True, msg=to_text(exc))
+
         self.facts = {}
         play_context = copy.deepcopy(self._play_context)
         play_context.network_os = self._get_network_os(task_vars)
@@ -66,7 +73,11 @@ class ActionModule(ActionBase):
 
         if play_context.network_os == 'iosxr':
            iosxr_schematrans = IosxrSchemaTransformNetconf()
-           config_xml_final = iosxr_schematrans.openconfig_to_netconf(config_xml_base)
+           config_xml_final = iosxr_schematrans.openconfig_to_netconf(config_xml_base, xpath_map_data)
+
+        if play_context.network_os == 'junos':
+            junos_schematrans = JunosSchemaTransformNetconf()
+            config_xml_final = junosxr_schematrans.openconfig_to_netconf(config_xml_base, xpath_map_data)
 
         with open(output_file, 'w') as f:
             f.write(config_xml_final)
@@ -130,3 +141,35 @@ class ActionModule(ActionBase):
             raise AnsibleError('ansible_network_os must be specified on this host to use platform agnostic modules')
 
         return network_os
+
+    def _handle_xpath_map(self):
+        try:
+            xpath_map_src = self._task.args.get('xpath_map')
+        except Exception as exc:
+            display.vvvv('No xpath_map is specified')
+            return dict(failed=False, msg="No xpath map is specified")
+
+        if xpath_map_src == None:
+            return
+
+        working_path = self._get_working_path()
+
+        if os.path.isabs(xpath_map_src) or urlsplit('xpath_map_src').scheme:
+            xpath_map_file = xpath_map_src
+        else:
+            xpath_map_file = self._loader.path_dwim_relative(working_path, 'templates', xpath_map_src)
+            if not xpath_map_file:
+                xpath_map_file = self._loader.path_dwim_relative(working_path, xpath_map_src)
+
+        if not os.path.exists(xpath_map_file):
+            raise ValueError('path specified in xpath_map not found')
+
+        try:
+            with open(xpath_map_file, 'r') as f:
+                xpath_map_data = yaml.load(f)
+                q(xpath_map_data)
+                return (xpath_map_data)
+        except IOError:
+            return dict(failed=True, msg='unable to load xpath_map file')
+
+

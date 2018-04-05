@@ -15,7 +15,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: json_parser
+module: open_config_parser
 short_description: Parses JSON openconfig based configs into xml which ansible
 can play
 description:
@@ -23,17 +23,23 @@ description:
 version_added: "2.5"
 options:
   src:
-    source file with openconfig in json
+    source file with openconfig in json. This file can have vars in jinja2 template
     required: true
   output:
-    output xml will be written here
+    output will be file in xml format which can be used using netconf_*
+    modules
     required: true
+  xpath_map:
+    optional mapping of openconfig model to desired model (e.g. device native
+            xml )
+    required: false
 author:
-  - Ansible Network Team
+  - Deepak Agrawal
 '''
 
 EXAMPLES = '''
-- json_parser:
+- open_config_parser:
     src: bgp.json
     output: bgp.xml
+    xpath_map: templates/junos_open_to_native_map.yml
 '''
