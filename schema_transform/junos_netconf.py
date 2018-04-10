@@ -3,7 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 from schema_transform.base_netconf_transform import SchemaTransformNetconfBase
 
 class JunosSchemaTransformNetconf(SchemaTransformNetconfBase):
-    def __init__(self):
 
     '''
     Function: openconfig_to_netconf
@@ -27,4 +26,5 @@ class JunosSchemaTransformNetconf(SchemaTransformNetconfBase):
         return transformed config in xml (string)
     '''
     def openconfig_to_xpath_map(self, config, xpath_map):
+        return config
 

@@ -28,7 +28,7 @@
 
     - name: Play bgp config via netconf to Junos
       netconf_config:
-          src: 'interface_openconfig.xml'
+          src: 'junos_interface_openconfig.xml'
       register: result
       tags: junos
                                                                                                                              

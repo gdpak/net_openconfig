@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 from schema_transform.openconfig_nsmap_def import OPENCONFIG_NS_MAP 
 from collections import OrderedDict
+from schema_transform.base_openconfig_xpath_transform import base_openconfig_xpath_map_transform_fn
 import q
 
 try:
@@ -22,11 +23,15 @@ class SchemaTransformNetconfBase(object):
     Converts openconfig to XML which netconf can understand
     config should be passed as raw string (python 3 ?)
     '''
-    def openconfig_to_netconf(self, config):
+    def openconfig_to_netconf(self, config, xpath_map_data=None):
         json_py_obj = json.loads(config, object_pairs_hook=OrderedDict)
         root = etree.Element("config")
         config_xml = self._json_to_xml(json_py_obj, root)
-        return (etree.tostring(root, pretty_print=True))
+        config_xml_str = etree.tostring(root, pretty_print=True)
+        if xpath_map_data is not None:
+            return base_openconfig_xpath_map_transform_fn(config_xml_str, xpath_map_data)
+        else:
+            return config_xml_str
 
     def _json_to_xml(self, json_obj, root):
         json_obj_type = type(json_obj)

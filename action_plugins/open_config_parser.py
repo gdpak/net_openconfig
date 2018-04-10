@@ -23,6 +23,7 @@ from ansible.module_utils.six.moves.urllib.parse import urlsplit
 from collections import OrderedDict
 from schema_transform.base_netconf_transform import SchemaTransformNetconfBase
 from schema_transform.iosxr_netconf import IosxrSchemaTransformNetconf
+from schema_transform.junos_netconf import JunosSchemaTransformNetconf
 
 try:
     from __main__ import display
@@ -69,7 +70,7 @@ class ActionModule(ActionBase):
 
         if play_context.connection == 'netconf':
            base_schematrans = SchemaTransformNetconfBase()
-           config_xml_base = base_schematrans.openconfig_to_netconf(src)
+           config_xml_base = base_schematrans.openconfig_to_netconf(src, xpath_map_data)
 
         if play_context.network_os == 'iosxr':
            iosxr_schematrans = IosxrSchemaTransformNetconf()
@@ -77,7 +78,7 @@ class ActionModule(ActionBase):
 
         if play_context.network_os == 'junos':
             junos_schematrans = JunosSchemaTransformNetconf()
-            config_xml_final = junosxr_schematrans.openconfig_to_netconf(config_xml_base, xpath_map_data)
+            config_xml_final = junos_schematrans.openconfig_to_netconf(config_xml_base, xpath_map_data)
 
         with open(output_file, 'w') as f:
             f.write(config_xml_final)
