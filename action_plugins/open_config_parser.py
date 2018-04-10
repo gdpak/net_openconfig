@@ -21,9 +21,9 @@ from ansible.module_utils._text import to_bytes, to_text
 from ansible.errors import AnsibleError, AnsibleUndefinedVariable, AnsibleFileNotFound
 from ansible.module_utils.six.moves.urllib.parse import urlsplit
 from collections import OrderedDict
-from schema_transform.base_netconf_transform import SchemaTransformNetconfBase
-from schema_transform.iosxr_netconf import IosxrSchemaTransformNetconf
-from schema_transform.junos_netconf import JunosSchemaTransformNetconf
+from schema_transform.base_netconf_transform  import SchemaTransformNetconfBase
+from schema_transform.iosxr_netconf_transform import IosxrSchemaTransformNetconf
+from schema_transform.junos_netconf_transform import JunosSchemaTransformNetconf
 
 try:
     from __main__ import display
