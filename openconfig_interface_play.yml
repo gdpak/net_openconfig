@@ -7,7 +7,7 @@
           output: 'templates/interface_openconfig.xml'
       register: result
 
-    - name: Play config via netconf to IosXr who understand openconfig model
+    - name: Play config via netconf to IosXr who understands openconfig model
       netconf_config:
           src: 'interface_openconfig.xml'
       register: result
@@ -26,7 +26,7 @@
           xpath_map: 'junos_open_to_native_xpath_map.yml'
       tags: parser
 
-    - name: Play bgp config via netconf to Junos in Junos specific yml
+    - name: Play interface config via netconf to Junos in Junos native xml
       netconf_config:
           src: 'junos_interface_openconfig.xml'
       register: result
