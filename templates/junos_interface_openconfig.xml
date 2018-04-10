@@ -1,18 +1,19 @@
-<configuration>
+<config>
+  <configuration>
   <interfaces>
     <interface>
       <name>ge-0/0/1</name>
       <unit>
-        <name>15</name>
+        <name>0</name>
         <family>
           <inet>
             <address>
-              <name>1.1.15.1</name>
-              <name>24</name>
-            </address>
+              <name>1.1.16.1/24</name>
+              </address>
           </inet>
         </family>
       </unit>
     </interface>
   </interfaces>
 </configuration>
+</config>

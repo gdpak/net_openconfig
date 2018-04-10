@@ -31,8 +31,6 @@ def create_new_subtree(parent, tag_name, value=None, nsmap=None):
 def find_parent(root, key_list):
     # Find longest prefix match for given xml hierarcy
     # Start search from end, end-1, end -2 ...
-    #pdb.set_trace()
-    print (key_list, len(key_list))
     keylen = len(key_list)
     if keylen == 1:
        # Hang this element from root
@@ -53,7 +51,6 @@ def insert_node(root, key_list, value_list):
     # we find parent only for first node and insert
     # all elements from same parent
 
-    print (key_list)
     tokens = filter(None, key_list[0].split("/"))
     new_parent, index_found = find_parent(root, tokens)
     
