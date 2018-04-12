@@ -38,31 +38,31 @@ EXAMPLES = '''
     output: bgp.xml                                                                                                                         
     xpath_map: templates/junos_open_to_native_map.yml  
     
- # open-config model tested
+ ## open-config model tested
  
  Following models are tested. Not all options are tested for each model. selective options tested can be found at below location
   - Interface - templates/interface_openconfig.json
   - Bgp - templates/bgp_edit_config.json 
  
- # Network OS tested (native openconfig model)
+ ### Network OS tested (native openconfig model)
  Above models are tested against below platform when data is passed in native openconfig model
  
  - IOS-XR version 6.1.2
  
- # Network OS tested (openconfig to os native transform)
+ ### Network OS tested (openconfig to os native transform)
  
  Above models are tested against below platforms where openconfig model is converted to OS native data model
  - Junos version version 17.3R1.10
  
- ## Adding new openconfig model
+ # Adding new openconfig model
  
- # openconfig native
+ ## openconfig native
  
  If your platform supports openconfig data model and model you want to test is fully complaint with destination, only thing you will need to do is to add xml namespaces for your model at below location
  
 - schema_transform/openconfig_nsmap_def.py 
 
-# vendor specific model
+## vendor specific model
  - first you need to define xpath_map which will have mapping for openconfig tags to vendor specific tags at below location
    and pass it as argument to open_config_parser module.
    Sample mappings are written in .yml file syntax format e.g. template/junos_open_to_native_xpath_map.yml
