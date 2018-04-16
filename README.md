@@ -11,14 +11,14 @@ There is a requirement of a ventor agnostic data-model for configuration and ope
 - Define your configs in openconfig model in a file and keep it in valid path as any other ansible template file
 - This openconfig template file supports jinja2 directives so you can define variable which can be declared per
   host or group as per requirements
-- use new module provided as part of this role 'open_config_parser' to parse the configs in openconfig or native
+- use new module provided as part of this role 'openconfig_parser' to parse the configs in openconfig or native
   vendor model. 
 - Conversion schema from openconfig to vendor native format should be provided by argument 'xpath_map' to above role
 - use 'netconf_config' module to play configs produced to destination device
 
 # new module
 
-module: open_config_parser                                                                                                                  
+module: openconfig_parser                                                                                                                  
 description: Parses JSON openconfig based configs into openconfig xml or native OS format                                                                                                                                    
 version_added: "2.5"                                                                                                                        
 options:                                                                                                                                    
@@ -33,7 +33,7 @@ options:
        required: false                                                                                                                         
                                                                                                                                      
 EXAMPLES = '''                                                                                                                              
-- open_config_parser:                                                                                                                       
+- openconfig_parser:                                                                                                                       
     src: bgp.json                                                                                                                           
     output: bgp.xml                                                                                                                         
     xpath_map: templates/junos_open_to_native_map.yml  

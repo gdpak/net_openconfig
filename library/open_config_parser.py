@@ -15,7 +15,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: open_config_parser
+module: openconfig_parser
 short_description: Parses JSON openconfig based configs into xml which ansible
 can play
 description:
@@ -38,7 +38,7 @@ author:
 '''
 
 EXAMPLES = '''
-- open_config_parser:
+- openconfig_parser:
     src: bgp.json
     output: bgp.xml
     xpath_map: templates/junos_open_to_native_map.yml
