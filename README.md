@@ -64,7 +64,7 @@ EXAMPLES = '''
 
 ## vendor specific model
  - first you need to define xpath_map which will have mapping for openconfig tags to vendor specific tags at below location
-   and pass it as argument to open_config_parser module.
+   and pass it as argument to openconfig_parser module.
    Sample mappings are written in .yml file syntax format e.g. template/junos_open_to_native_xpath_map.yml
    
  - There might be some code required to do schema conversion. e.g. junos needs interface ip in format <ip-address>/<mask>
