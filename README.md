@@ -28,7 +28,7 @@ options:
    - output:                                                                                                                                   
        output will be file in xml format which can be used using netconf_* modules                                                                                                                                 
        required: true
-   - ns_map:
+   - ns_map:  
        optional mapping for openconfig tags to xml namespace. Some devices like iosxr
        needs this mapping as they support multiple model for same configuration hierarchy
        required: false
