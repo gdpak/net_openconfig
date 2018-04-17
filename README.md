@@ -27,7 +27,11 @@ options:
        required: true                                                                                                                          
    - output:                                                                                                                                   
        output will be file in xml format which can be used using netconf_* modules                                                                                                                                 
-       required: true                                                                                                                          
+       required: true
+   - ns_map:
+       optional mapping for openconfig tags to xml namespace. Some devices like iosxr
+       needs this mapping as they support multiple model for same configuration hierarchy
+       required: false
    - xpath_map:                                                                                                                                
        optional mapping of openconfig model to desired model (e.g. device native xml )                                                                                                                           
        required: false                                                                                                                         
@@ -58,9 +62,8 @@ EXAMPLES = '''
  
  ## openconfig native
  
- If your platform supports openconfig data model and model you want to test is fully complaint with destination, only thing you will need to do is to add xml namespaces for your model at below location
+ If your platform supports openconfig data model and model, you want to test is fully complaint with destination, only thing you will need to do is to add xml namespaces and pass it as argument 'ns_map'
  
-- schema_transform/openconfig_nsmap_def.py 
 
 ## vendor specific model
  - first you need to define xpath_map which will have mapping for openconfig tags to vendor specific tags at below location
