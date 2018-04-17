@@ -24,6 +24,7 @@ from collections import OrderedDict
 from schema_transform.base_netconf_transform  import SchemaTransformNetconfBase
 from schema_transform.iosxr_netconf_transform import IosxrSchemaTransformNetconf
 from schema_transform.junos_netconf_transform import JunosSchemaTransformNetconf
+from schema_transform.openconfig_nsmap_def import load_ns_map_from_module_args
 
 try:
     from __main__ import display
@@ -60,9 +61,15 @@ class ActionModule(ActionBase):
         except ValueError as exc:
             return dict(failed=True, msg=to_text(exc))
 
+        try:
+            ns_map_data = self._handle_ns_map()
+        except ValueError as exc:
+            return dict(failed=True, msg=to_text(exc))
+
         self.facts = {}
         play_context = copy.deepcopy(self._play_context)
         play_context.network_os = self._get_network_os(task_vars)
+        load_ns_map_from_module_args(ns_map_data)
         q("network_os=%s connection=%s \n" % (play_context.network_os, play_context.connection))
 
         # Load appropriate low level config generator bases on network_os
@@ -173,4 +180,34 @@ class ActionModule(ActionBase):
         except IOError:
             return dict(failed=True, msg='unable to load xpath_map file')
 
+    def _handle_ns_map(self):
+        try:
+            ns_map_src = self._task.args.get('ns_map')
+        except Exception as exc:
+            display.vvvv('No ns_map is specified')
+            return dict(failed=False, msg="No ns map is specified")
+
+        if ns_map_src == None:
+            return
+
+        working_path = self._get_working_path()
+
+        if os.path.isabs(ns_map_src) or urlsplit('ns_map_src').scheme:
+            ns_map_file = ns_map_src
+        else:
+            ns_map_file = self._loader.path_dwim_relative(working_path,
+                    'templates', ns_map_src)
+            if not ns_map_file:
+                ns_map_file = self._loader.path_dwim_relative(working_path, ns_map_src)
+
+        if not os.path.exists(ns_map_file):
+            raise ValueError('path specified in ns_map not found')
+
+        try:
+            with open(ns_map_file, 'r') as f:
+                ns_map_data = yaml.load(f)
+                q(ns_map_data)
+                return (ns_map_data)
+        except IOError:
+            return dict(failed=True, msg='unable to load ns_map file')
 
